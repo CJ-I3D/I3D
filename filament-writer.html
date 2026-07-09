@@ -121,53 +121,53 @@
     const copyBtn = document.getElementById('copyBtn');
     const statusDiv = document.getElementById('status');
 
-    // Complete catalog database mapped by material types
+    // Complete catalog database mapped by material types with matched circle prefixes
     const colorCatalog = {
         "00807665": [ // PLA Options
-            { val: "FFFFFF", name: "⚪ PLA - Frost White" },
-            { val: "000000", name: "⚫ PLA - Midnight Black" },
-            { val: "7F8C8D", name: "🔘 PLA - Shark Grey" },
-            { val: "DC143C", name: "🔴 PLA - Crimson Red" },
-            { val: "0077BE", name: "🔵 PLA - Ocean Blue" },
-            { val: "E6D7B9", name: "⏳ PLA - Desert Beige" },
-            { val: "FFFF31", name: "🟡 PLA - Daffodil Yellow" },
-            { val: "5C4033", name: "🪵 PLA - Hazelnut Brown" },
-            { val: "A0522D", name: "🧱 PLA - Burnt Sienna" },
-            { val: "D4AF37", name: "👑 PLA - Gilded Gold" },
-            { val: "C0C0C0", name: "🪙 PLA - Sterling Silver" },
-            { val: "111111", name: "🌌 PLA - Cosmic Black" },
-            { val: "0047AB", name: "🌀 PLA - Cobalt Blue" },
-            { val: "FF4500", name: "🌅 PLA - Sunset Orange" },
-            { val: "FF7518", name: "🎃 PLA - Pumpkin Orange" },
-            { val: "50C878", name: "🟢 PLA - Emerald Green" },
-            { val: "7D0541", name: "🍇 PLA - Beetroot Purple" },
-            { val: "FF1493", name: "💗 PLA - Deep Pink" },
-            { val: "98FF98", name: "✨ PLA - Silk Mint Green" },
-            { val: "87CEEB", name: "✨ PLA - Silk Sky Blue" },
-            { val: "FFD700", name: "✨ PLA - Silk Gold" },
-            { val: "F8F9FA", name: "✨ PLA - Silk White" },
-            { val: "1A1A1A", name: "✨ PLA - Silk Black" },
-            { val: "A9A9A9", name: "✨ PLA - Silk Grey" },
-            { val: "F2F0EA", name: "🪨 PLA - Marble White" },
-            { val: "B0A99F", name: "🪨 PLA - Marble Stone" },
-            { val: "E0EEEE", name: "🎐 PLA - Transparent" },
-            { val: "556B2F", name: "♻️ PLA - Ecoblend" }
+            { val: "FFFFFF", name: "● PLA - Frost White" },
+            { val: "000000", name: "● PLA - Midnight Black" },
+            { val: "7F8C8D", name: "● PLA - Shark Grey" },
+            { val: "DC143C", name: "● PLA - Crimson Red" },
+            { val: "0077BE", name: "● PLA - Ocean Blue" },
+            { val: "E6D7B9", name: "● PLA - Desert Beige" },
+            { val: "FFFF31", name: "● PLA - Daffodil Yellow" },
+            { val: "5C4033", name: "● PLA - Hazelnut Brown" },
+            { val: "A0522D", name: "● PLA - Burnt Sienna" },
+            { val: "D4AF37", name: "● PLA - Gilded Gold" },
+            { val: "C0C0C0", name: "● PLA - Sterling Silver" },
+            { val: "111111", name: "● PLA - Cosmic Black" },
+            { val: "0047AB", name: "● PLA - Cobalt Blue" },
+            { val: "FF4500", name: "● PLA - Sunset Orange" },
+            { val: "FF7518", name: "● PLA - Pumpkin Orange" },
+            { val: "50C878", name: "● PLA - Emerald Green" },
+            { val: "7D0541", name: "● PLA - Beetroot Purple" },
+            { val: "FF1493", name: "● PLA - Deep Pink" },
+            { val: "98FF98", name: "● PLA - Silk Mint Green" },
+            { val: "87CEEB", name: "● PLA - Silk Sky Blue" },
+            { val: "FFD700", name: "● PLA - Silk Gold" },
+            { val: "F8F9FA", name: "● PLA - Silk White" },
+            { val: "1A1A1A", name: "● PLA - Silk Black" },
+            { val: "A9A9A9", name: "● PLA - Silk Grey" },
+            { val: "F2F0EA", name: "● PLA - Marble White" },
+            { val: "B0A99F", name: "● PLA - Marble Stone" },
+            { val: "E0EEEE", name: "● PLA - Transparent" },
+            { val: "556B2F", name: "● PLA - Ecoblend" }
         ],
         "80698471": [ // PETG Options
-            { val: "F0F2F5", name: "⚪ PETG - Pearl White" },
-            { val: "5A5F66", name: "🔘 PETG - Steel Grey" },
-            { val: "0A0A0A", name: "⚫ PETG - Jet Black" },
-            { val: "1D4E89", name: "🔵 PETG - Pacific Blue" },
-            { val: "9B111E", name: "🔴 PETG - Ruby Red" },
-            { val: "224D34", name: "🟢 PETG - Forest Green" },
-            { val: "B38F43", name: "👑 PETG - Imperial Gold" },
-            { val: "FFFDD0", name: "🥛 PETG - Light Cream" },
-            { val: "FFFFFF", name: "💎 PETG - Crystal Clear" },
-            { val: "50C878", name: "💎 PETG - Crystal Green" },
-            { val: "0073CF", name: "💎 PETG - Crystal Blue" },
-            { val: "A020F0", name: "💎 PETG - Crystal Purple" },
-            { val: "FF69B4", name: "💎 PETG - Crystal Pink" },
-            { val: "2E8B57", name: "♻️ PETG - Ecoblend" }
+            { val: "F0F2F5", name: "● PETG - Pearl White" },
+            { val: "5A5F66", name: "● PETG - Steel Grey" },
+            { val: "0A0A0A", name: "● PETG - Jet Black" },
+            { val: "1D4E89", name: "● PETG - Pacific Blue" },
+            { val: "9B111E", name: "● PETG - Ruby Red" },
+            { val: "224D34", name: "● PETG - Forest Green" },
+            { val: "B38F43", name: "● PETG - Imperial Gold" },
+            { val: "FFFDD0", name: "● PETG - Light Cream" },
+            { val: "FFFFFF", name: "● PETG - Crystal Clear" },
+            { val: "50C878", name: "● PETG - Crystal Green" },
+            { val: "0073CF", name: "● PETG - Crystal Blue" },
+            { val: "A020F0", name: "● PETG - Crystal Purple" },
+            { val: "FF69B4", name: "● PETG - Crystal Pink" },
+            { val: "2E8B57", name: "● PETG - Ecoblend" }
         ]
     };
 
@@ -176,18 +176,23 @@
         const selectedMaterial = materialSelect.value;
         const matchingColors = colorCatalog[selectedMaterial] || [];
         
-        // Clear old options
         colorSelect.innerHTML = "";
         
-        // Inject filtered items
         matchingColors.forEach(color => {
             const opt = document.createElement('option');
             opt.value = color.val;
             opt.innerText = color.name;
+            
+            // Apply inline style matching the text block hex color directly to the select item text
+            // Note: Standard system select dropdown text colors depend on browser/OS styling engines
+            opt.style.color = `#${color.val}`;
+            if (color.val === "FFFFFF" || color.val === "F8F9FA" || color.val === "F2F0EA") {
+                opt.style.textShadow = "0px 0px 2px #000"; // Gives white circles structural visibility
+            }
+            
             colorSelect.appendChild(opt);
         });
         
-        // Regenerate the hex output string based on the new options
         generateHex();
     }
 
@@ -196,10 +201,9 @@
         const col = colorSelect.value;
         const wgt = weightSelect.value;
 
-        // If no colors exist yet during initialization cycle, abort
         if (!col) return;
 
-        // Core structural array from working AnySpool layout configuration
+        // Base structural array from working AnySpool layout configuration
         const baseBlocks = [
             "A2:04:0103A00C", "A2:05:34030FD1", "A2:06:010B5504", 
             "A2:07:656C6567", "A2:08:6F6F2E63", "A2:09:6F6DFE00", 
@@ -220,20 +224,16 @@
             "A2:18:26070000"      // Page 18 trailing configuration check block
         ];
 
-        // Format cleanly with commas to execute all commands seamlessly inside NFC Tools
         const completePayload = [...baseBlocks, ...dynamicBlocks].join(',');
         hexDisplay.innerText = completePayload;
     }
 
-    // Interactive event processing triggers
     materialSelect.addEventListener('change', updateColorDropdown);
     colorSelect.addEventListener('change', generateHex);
     weightSelect.addEventListener('change', generateHex);
 
-    // Initial operational boot layout rendering
     updateColorDropdown();
 
-    // System clipboard engine integration
     copyBtn.addEventListener('click', () => {
         const textToCopy = hexDisplay.innerText;
         navigator.clipboard.writeText(textToCopy).then(() => {
