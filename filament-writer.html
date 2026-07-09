@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Filament NFC Configurator</title>
+    <title>Invent3D Filament NFC Configurator</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -105,7 +105,7 @@
     const writeBtn = document.getElementById('writeBtn');
     const statusDiv = document.getElementById('status');
 
-    // Audio feedback context
+    // Establish web audio feedback system
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function beep(freq, duration) {
         const osc = audioCtx.createOscillator();
@@ -126,30 +126,33 @@
     }
 
     writeBtn.addEventListener('click', async () => {
+        // Hardware platform capability check
         if (!('NDEFReader' in window)) {
             showStatus("❌ This browser/device doesn't support Web NFC. Use Chrome on Android.", "error");
             return;
         }
 
         const mat = document.getElementById('material').value;
-        const col = document.getElementById('color').value;
+        const col = document.getElementById('color').value.replace('#', ''); // Strips '#' for URI query string compatibility
         const wgt = document.getElementById('weight').value;
         
-        // Dynamic payload string following the printer specification
-        const payloadStr = `ELG-RFID|MAT:${mat}|COL:${col}|WGT:${wgt}`;
+        // Formulates parameters to match the Elegoo firmware web link parser structure
+        const payloadUrl = `https://www.elegoo.com/filament?m=${mat}&c=${col}&w=${wgt}`;
 
         try {
             showStatus("👋 Hold blank tag against back of phone...", "scanning");
             const ndef = new NDEFReader();
             
-            // Fires the hardware writer loop
-            await ndef.write(payloadStr);
+            // Fires explicit URI formatting sequence to the chip loop
+            await ndef.write({
+                records: [{ recordType: "url", data: payloadUrl }]
+            });
             
             showStatus("✨ Tag Programmed Successfully!", "success");
-            beep(880, 0.2); // Clean operational completion beep
+            beep(880, 0.2); // Clean functional success alert
         } catch (error) {
             showStatus(`❌ Write Failed: ${error.message}`, "error");
-            beep(220, 0.4); // Failure warning tone
+            beep(220, 0.4); // Deep pitch configuration error alert
         }
     });
 </script>
