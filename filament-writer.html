@@ -73,27 +73,17 @@
     
     <label for="material">Material Profile</label>
     <select id="material">
-        <option value="00807665">PLA</option>
-        <option value="00807665">PLA+</option>
-        <option value="80698471">PETG</option>
-        <option value="00656683">ABS</option>
-        <option value="00006583">ASA</option>
+        <option value="80698471">PETG (Testing Target)</option>
     </select>
 
     <label for="color">Spool Color</label>
     <select id="color">
-        <option value="FF0000">🔴 Red</option>
-        <option value="0000FF">🔵 Blue</option>
-        <option value="00FF00">🟢 Green</option>
-        <option value="000000">⚫ Black</option>
-        <option value="FFFFFF">⚪ White</option>
-        <option value="7F7F7F">🔘 Grey</option>
+        <option value="EEEEEE">🔘 Grey (Testing Target)</option>
     </select>
 
     <label for="weight">Weight (g)</label>
     <select id="weight">
         <option value="03E8">1000g (1kg)</option>
-        <option value="0BB8">3000g (3kg)</option>
     </select>
 
     <button class="btn-write" id="writeBtn">Tap to Encode Tag</button>
@@ -138,37 +128,40 @@
             return;
         }
 
-        // Gather parameters directly as parsed byte-strings
-        const matHex = document.getElementById('material').value;
-        const colorHex = document.getElementById('color').value;
-        const weightHex = document.getElementById('weight').value;
-
         try {
             showStatus("👋 Hold blank tag against back of phone...", "scanning");
             const ndef = new NDEFReader();
-            await ndef.scan(); // Open antenna gate
+            await ndef.scan(); 
 
-            // Compile the precise 4-byte system grid mapping structure 
+            // Hardcoded precise 21-record consecutive alignment grid matching the AnySpool map
             const records = [
-                { recordType: "unknown", data: hexToBytes("0103A00C") }, // Page 04 Wrapper
-                { recordType: "unknown", data: hexToBytes("34030FD1") }, // Page 05 Wrapper
-                { recordType: "unknown", data: hexToBytes("010B5502") }, // Page 06 Wrapper
-                { recordType: "unknown", data: hexToBytes("656C6567") }, // Page 07 (eleg)
-                { recordType: "unknown", data: hexToBytes("6F6F2E63") }, // Page 08 (oo.c)
-                { recordType: "unknown", data: hexToBytes("6F6DFE00") }, // Page 09 (om/f)
-                
-                // Dynamic Parameters block insertion
-                { recordType: "unknown", data: hexToBytes("36" + colorHex) },      // Page 16 (Prefix 36 + Hex Color)
-                { recordType: "unknown", data: hexToBytes(matHex) },              // Page 18 (Material Code)
-                { recordType: "unknown", data: hexToBytes("00AF" + weightHex) },  // Page 23 (1.75mm + Target Weight)
-                { recordType: "unknown", data: hexToBytes("2501C800") },          // Verification block
-                { recordType: "unknown", data: hexToBytes("BD040000") }           // Trailing alignment bit
+                { recordType: "unknown", data: hexToBytes("0103A00C") }, // Page 04
+                { recordType: "unknown", data: hexToBytes("34030FD1") }, // Page 05
+                { recordType: "unknown", data: hexToBytes("010B5504") }, // Page 06
+                { recordType: "unknown", data: hexToBytes("656C6567") }, // Page 07
+                { recordType: "unknown", data: hexToBytes("6F6F2E63") }, // Page 08
+                { recordType: "unknown", data: hexToBytes("6F6DFE00") }, // Page 09
+                { recordType: "unknown", data: hexToBytes("00000000") }, // Page 0A Padding
+                { recordType: "unknown", data: hexToBytes("00000000") }, // Page 0B Padding
+                { recordType: "unknown", data: hexToBytes("00000000") }, // Page 0C Padding
+                { recordType: "unknown", data: hexToBytes("00000000") }, // Page 0D Padding
+                { recordType: "unknown", data: hexToBytes("00000000") }, // Page 0E Padding
+                { recordType: "unknown", data: hexToBytes("00000000") }, // Page 0F Padding
+                { recordType: "unknown", data: hexToBytes("36EEEEEE") }, // Page 10 (Color: Grey)
+                { recordType: "unknown", data: hexToBytes("EE000100") }, // Page 11
+                { recordType: "unknown", data: hexToBytes("80698471") }, // Page 12 (Material: PETG)
+                { recordType: "unknown", data: hexToBytes("01050000") }, // Page 13
+                { recordType: "unknown", data: hexToBytes("9E9E9E00") }, // Page 14
+                { recordType: "unknown", data: hexToBytes("00F00104") }, // Page 15
+                { recordType: "unknown", data: hexToBytes("00000000") }, // Page 16
+                { recordType: "unknown", data: hexToBytes("00AF03E8") }, // Page 17 (Spec/Weight)
+                { recordType: "unknown", data: hexToBytes("26070000") }  // Page 18
             ];
 
-            // Direct sequence execution to the MIFARE sector map
+            // Pushes sequential blocks out to the chip
             await ndef.write({ records: records });
             
-            showStatus("✨ Custom Tag Configured Successfully!", "success");
+            showStatus("✨ Testing Tag Encoded Successfully!", "success");
             beep(880, 0.2);
         } catch (error) {
             showStatus(`❌ Configuration Failed: ${error.message}`, "error");
