@@ -21,7 +21,7 @@
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             width: 100%;
-            max-width: 450px;
+            max-width: 480px;
             box-sizing: border-box;
         }
         h2 { margin-top: 0; color: #111; text-align: center; }
@@ -90,31 +90,71 @@
     
     <label for="material">Material Profile</label>
     <select id="material">
-        <option value="80698471">PETG</option>
-        <option value="00807665">PLA / PLA+</option>
-        <option value="00656683">ABS</option>
+        <option value="00807665">PLA / PLA+ / Silk / Special</option>
+        <option value="80698471">PETG / Crystal</option>
     </select>
 
     <label for="color">Spool Color</label>
     <select id="color">
-        <option value="EEEEEE">🔘 Grey (Steel / Rapid)</option>
-        <option value="FF0000">🔴 Red</option>
-        <option value="0000FF">🔵 Blue</option>
-        <option value="00FF00">🟢 Green</option>
-        <option value="000000">⚫ Black</option>
-        <option value="FFFFFF">⚪ White</option>
+        <option value="FFFFFF">⚪ PLA - Frost White</option>
+        <option value="000000">⚫ PLA - Midnight Black</option>
+        <option value="7F8C8D">🔘 PLA - Shark Grey</option>
+        <option value="DC143C">🔴 PLA - Crimson Red</option>
+        <option value="0077BE">🔵 PLA - Ocean Blue</option>
+        <option value="E6D7B9">⏳ PLA - Desert Beige</option>
+        <option value="FFFF31">🟡 PLA - Daffodil Yellow</option>
+        <option value="5C4033">🪵 PLA - Hazelnut Brown</option>
+        <option value="A0522D">🧱 PLA - Burnt Sienna</option>
+        <option value="D4AF37">👑 PLA - Gilded Gold</option>
+        <option value="C0C0C0">🪙 PLA - Sterling Silver</option>
+        <option value="111111">🌌 PLA - Cosmic Black</option>
+        <option value="0047AB">🌀 PLA - Cobalt Blue</option>
+        <option value="FF4500">🌅 PLA - Sunset Orange</option>
+        <option value="FF7518">🎃 PLA - Pumpkin Orange</option>
+        <option value="50C878">🟢 PLA - Emerald Green</option>
+        <option value="7D0541">🍇 PLA - Beetroot Purple</option>
+        <option value="FF1493">💗 PLA - Deep Pink</option>
+
+        <option value="98FF98">✨ PLA - Silk Mint Green</option>
+        <option value="87CEEB">✨ PLA - Silk Sky Blue</option>
+        <option value="FFD700">✨ PLA - Silk Gold</option>
+        <option value="F8F9FA">✨ PLA - Silk White</option>
+        <option value="1A1A1A">✨ PLA - Silk Black</option>
+        <option value="A9A9A9">✨ PLA - Silk Grey</option>
+        <option value="F2F0EA">🪨 PLA - Marble White</option>
+        <option value="B0A99F">🪨 PLA - Marble Stone</option>
+        <option value="E0EEEE">🎐 PLA - Transparent</option>
+
+        <option value="F0F2F5">⚪ PETG - Pearl White</option>
+        <option value="5A5F66">🔘 PETG - Steel Grey</option>
+        <option value="0A0A0A">⚫ PETG - Jet Black</option>
+        <option value="1D4E89">🔵 PETG - Pacific Blue</option>
+        <option value="9B111E">🔴 PETG - Ruby Red</option>
+        <option value="224D34">🟢 PETG - Forest Green</option>
+        <option value="B38F43">👑 PETG - Imperial Gold</option>
+        <option value="FFFDD0">🥛 PETG - Light Cream</option>
+        <option value="FFFFFF">💎 PETG - Crystal Clear</option>
+        <option value="50C878">💎 PETG - Crystal Green</option>
+        <option value="0073CF">💎 PETG - Crystal Blue</option>
+        <option value="A020F0">💎 PETG - Crystal Purple</option>
+        <option value="FF69B4">💎 PETG - Crystal Pink</option>
+
+        <option value="556B2F">♻️ PLA - Ecoblend</option>
+        <option value="2E8B57">♻️ PETG - Ecoblend</option>
     </select>
 
     <label for="weight">Weight (g)</label>
     <select id="weight">
         <option value="03E8">1000g (1kg)</option>
+        <option value="02EE">750g</option>
+        <option value="01FA">500g</option>
     </select>
 
     <div class="output-box">
         <label>Generated NFC Tools Payload:</label>
-        <div class="hex-display" id="hexString">Loading...</div>
+        <div class="hex-display" id="hexString">Generating payload...</div>
         <button class="btn-copy" id="copyBtn">Copy Commands List</button>
-        <div id="status">Ccoped to clipboard!</div>
+        <div id="status">Copied to clipboard!</div>
     </div>
 </div>
 
@@ -131,7 +171,7 @@
         const col = colorSelect.value;
         const wgt = weightSelect.value;
 
-        // Base structural array derived from working configs
+        // Base structural array from working AnySpool configuration maps
         const baseBlocks = [
             "A2:04:0103A00C", "A2:05:34030FD1", "A2:06:010B5504", 
             "A2:07:656C6567", "A2:08:6F6F2E63", "A2:09:6F6DFE00", 
@@ -139,40 +179,40 @@
             "A2:0D:00000000", "A2:0E:00000000", "A2:0F:00000000"
         ];
 
-        // Dynamic target placements 
+        // Dynamic targets with proper alignment shift bytes
         const dynamicBlocks = [
-            `A2:10:36${col}`,     // Page 10 (Color code assignment)
-            "A2:11:EE000100",     // Page 11 structural byte
-            `A2:12:${mat}`,       // Page 12 (Material profile assignment)
-            "A2:13:01050000",     // Page 13 configuration byte
-            "A2:14:9E9E9E00",     // Page 14 padding configuration
-            "A2:15:00F00104",     // Page 15 security configuration
-            "A2:16:00000000",     // Page 16 empty sector
-            `A2:17:00AF${wgt}`,   // Page 17 (Filament Diameter + Target Weight)
-            "A2:18:26070000"      // Page 18 trailing configuration check
+            `A2:10:36${col}`,     // Page 10 (Dynamic Material Color Assignment)
+            "A2:11:EE000100",     // Page 11 alignment configuration structural byte
+            `A2:12:${mat}`,       // Page 12 (Dynamic Material Class Identification Profile)
+            "A2:13:01050000",     // Page 13 execution firmware byte
+            "A2:14:9E9E9E00",     // Page 14 padding parameters
+            "A2:15:00F00104",     // Page 15 standard configuration profile
+            "A2:16:00000000",     // Page 16 zero-padded registry slot
+            `A2:17:00AF${wgt}`,   // Page 17 (1.75mm Standard Identifier + Target Core Weight)
+            "A2:18:26070000"      // Page 18 checking trailing byte verification sequence
         ];
 
-        // Join everything cleanly by commas for multi-command paste support
+        // Format cleanly with commas to execute all commands at once in NFC Tools
         const completePayload = [...baseBlocks, ...dynamicBlocks].join(',');
         hexDisplay.innerText = completePayload;
     }
 
-    // Attach real-time calculation triggers to drop menus
+    // Interactive configuration event maps
     materialSelect.addEventListener('change', generateHex);
     colorSelect.addEventListener('change', generateHex);
     weightSelect.addEventListener('change', generateHex);
 
-    // Initial load generation
+    // Initial load state processing
     generateHex();
 
-    // Direct platform clipboard integration
+    // Clipboard processing interface integration
     copyBtn.addEventListener('click', () => {
         const textToCopy = hexDisplay.innerText;
         navigator.clipboard.writeText(textToCopy).then(() => {
             statusDiv.style.display = 'block';
             setTimeout(() => { statusDiv.style.display = 'none'; }, 2000);
         }).catch(err => {
-            alert('Could not copy text: ' + err);
+            alert('Clipboard action failed: ' + err);
         });
     });
 </script>
