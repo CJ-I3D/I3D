@@ -21,11 +21,11 @@
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             width: 100%;
-            max-width: 480px;
+            max-width: 500px;
             box-sizing: border-box;
         }
         h2 { margin-top: 0; color: #111; text-align: center; }
-        label { display: block; margin: 14px 0 6px; font-weight: 600; font-size: 14px; }
+        label { display: block; margin: 18px 0 8px; font-weight: 600; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; color: #666; }
         select {
             width: 100%;
             padding: 12px;
@@ -40,6 +40,50 @@
             border-color: #0078d4;
             outline: none;
         }
+        
+        /* Grid Layout for Colors */
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+            max-height: 320px;
+            overflow-y: auto;
+            padding: 4px;
+            border: 1px solid #e1e4e8;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+        .color-button {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border: 2px solid #ced4da;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 13px;
+            font-weight: 500;
+            text-align: left;
+        }
+        .color-button:hover {
+            border-color: #a1a1a1;
+        }
+        .color-button.selected {
+            border-color: #0078d4;
+            background-color: #f0f7ff;
+            box-shadow: 0 0 0 1px #0078d4;
+        }
+        .color-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            margin-right: 8px;
+            flex-shrink: 0;
+            border: 1px solid rgba(0,0,0,0.15);
+        }
+        
         .output-box {
             margin-top: 20px;
             background-color: #f8f9fa;
@@ -56,7 +100,7 @@
             padding: 10px;
             border: 1px solid #e1e4e8;
             border-radius: 4px;
-            max-height: 120px;
+            max-height: 100px;
             overflow-y: auto;
             margin-bottom: 12px;
         }
@@ -94,9 +138,9 @@
         <option value="80698471">PETG / Crystal</option>
     </select>
 
-    <label for="color">Spool Color</label>
-    <select id="color">
-        </select>
+    <label>Spool Color</label>
+    <div class="color-grid" id="colorGrid">
+        </div>
 
     <label for="weight">Weight (g)</label>
     <select id="weight">
@@ -115,82 +159,101 @@
 
 <script>
     const materialSelect = document.getElementById('material');
-    const colorSelect = document.getElementById('color');
+    const colorGrid = document.getElementById('colorGrid');
     const weightSelect = document.getElementById('weight');
     const hexDisplay = document.getElementById('hexString');
     const copyBtn = document.getElementById('copyBtn');
     const statusDiv = document.getElementById('status');
 
-    // Complete catalog database mapped by material types with matched circle prefixes
+    let selectedColorHex = "";
+
+    // Complete catalog database
     const colorCatalog = {
         "00807665": [ // PLA Options
-            { val: "FFFFFF", name: "● PLA - Frost White" },
-            { val: "000000", name: "● PLA - Midnight Black" },
-            { val: "7F8C8D", name: "● PLA - Shark Grey" },
-            { val: "DC143C", name: "● PLA - Crimson Red" },
-            { val: "0077BE", name: "● PLA - Ocean Blue" },
-            { val: "E6D7B9", name: "● PLA - Desert Beige" },
-            { val: "FFFF31", name: "● PLA - Daffodil Yellow" },
-            { val: "5C4033", name: "● PLA - Hazelnut Brown" },
-            { val: "A0522D", name: "● PLA - Burnt Sienna" },
-            { val: "D4AF37", name: "● PLA - Gilded Gold" },
-            { val: "C0C0C0", name: "● PLA - Sterling Silver" },
-            { val: "111111", name: "● PLA - Cosmic Black" },
-            { val: "0047AB", name: "● PLA - Cobalt Blue" },
-            { val: "FF4500", name: "● PLA - Sunset Orange" },
-            { val: "FF7518", name: "● PLA - Pumpkin Orange" },
-            { val: "50C878", name: "● PLA - Emerald Green" },
-            { val: "7D0541", name: "● PLA - Beetroot Purple" },
-            { val: "FF1493", name: "● PLA - Deep Pink" },
-            { val: "98FF98", name: "● PLA - Silk Mint Green" },
-            { val: "87CEEB", name: "● PLA - Silk Sky Blue" },
-            { val: "FFD700", name: "● PLA - Silk Gold" },
-            { val: "F8F9FA", name: "● PLA - Silk White" },
-            { val: "1A1A1A", name: "● PLA - Silk Black" },
-            { val: "A9A9A9", name: "● PLA - Silk Grey" },
-            { val: "F2F0EA", name: "● PLA - Marble White" },
-            { val: "B0A99F", name: "● PLA - Marble Stone" },
-            { val: "E0EEEE", name: "● PLA - Transparent" },
-            { val: "556B2F", name: "● PLA - Ecoblend" }
+            { val: "FFFFFF", name: "Frost White" },
+            { val: "000000", name: "Midnight Black" },
+            { val: "7F8C8D", name: "Shark Grey" },
+            { val: "DC143C", name: "Crimson Red" },
+            { val: "0077BE", name: "Ocean Blue" },
+            { val: "E6D7B9", name: "Desert Beige" },
+            { val: "FFFF31", name: "Daffodil Yellow" },
+            { val: "5C4033", name: "Hazelnut Brown" },
+            { val: "A0522D", name: "Burnt Sienna" },
+            { val: "D4AF37", name: "Gilded Gold" },
+            { val: "C0C0C0", name: "Sterling Silver" },
+            { val: "111111", name: "Cosmic Black" },
+            { val: "0047AB", name: "Cobalt Blue" },
+            { val: "FF4500", name: "Sunset Orange" },
+            { val: "FF7518", name: "Pumpkin Orange" },
+            { val: "50C878", name: "Emerald Green" },
+            { val: "7D0541", name: "Beetroot Purple" },
+            { val: "FF1493", name: "Deep Pink" },
+            { val: "98FF98", name: "Silk Mint Green" },
+            { val: "87CEEB", name: "Silk Sky Blue" },
+            { val: "FFD700", name: "Silk Gold" },
+            { val: "F8F9FA", name: "Silk White" },
+            { val: "1A1A1A", name: "Silk Black" },
+            { val: "A9A9A9", name: "Silk Grey" },
+            { val: "F2F0EA", name: "Marble White" },
+            { val: "B0A99F", name: "Marble Stone" },
+            { val: "E0EEEE", name: "Transparent" },
+            { val: "556B2F", name: "Ecoblend" }
         ],
         "80698471": [ // PETG Options
-            { val: "F0F2F5", name: "● PETG - Pearl White" },
-            { val: "5A5F66", name: "● PETG - Steel Grey" },
-            { val: "0A0A0A", name: "● PETG - Jet Black" },
-            { val: "1D4E89", name: "● PETG - Pacific Blue" },
-            { val: "9B111E", name: "● PETG - Ruby Red" },
-            { val: "224D34", name: "● PETG - Forest Green" },
-            { val: "B38F43", name: "● PETG - Imperial Gold" },
-            { val: "FFFDD0", name: "● PETG - Light Cream" },
-            { val: "FFFFFF", name: "● PETG - Crystal Clear" },
-            { val: "50C878", name: "● PETG - Crystal Green" },
-            { val: "0073CF", name: "● PETG - Crystal Blue" },
-            { val: "A020F0", name: "● PETG - Crystal Purple" },
-            { val: "FF69B4", name: "● PETG - Crystal Pink" },
-            { val: "2E8B57", name: "● PETG - Ecoblend" }
+            { val: "F0F2F5", name: "Pearl White" },
+            { val: "5A5F66", name: "Steel Grey" },
+            { val: "0A0A0A", name: "Jet Black" },
+            { val: "1D4E89", name: "Pacific Blue" },
+            { val: "9B111E", name: "Ruby Red" },
+            { val: "224D34", name: "Forest Green" },
+            { val: "B38F43", name: "Imperial Gold" },
+            { val: "FFFDD0", name: "Light Cream" },
+            { val: "FFFFFF", name: "Crystal Clear" },
+            { val: "50C878", name: "Crystal Green" },
+            { val: "0073CF", name: "Crystal Blue" },
+            { val: "A020F0", name: "Crystal Purple" },
+            { val: "FF69B4", name: "Crystal Pink" },
+            { val: "2E8B57", name: "Ecoblend" }
         ]
     };
 
-    // Updates the color selection choices when material switches
-    function updateColorDropdown() {
+    function updateColorGrid() {
         const selectedMaterial = materialSelect.value;
         const matchingColors = colorCatalog[selectedMaterial] || [];
         
-        colorSelect.innerHTML = "";
+        colorGrid.innerHTML = "";
         
-        matchingColors.forEach(color => {
-            const opt = document.createElement('option');
-            opt.value = color.val;
-            opt.innerText = color.name;
+        matchingColors.forEach((color, index) => {
+            const btn = document.createElement('div');
+            btn.className = 'color-button';
+            btn.dataset.hex = color.val;
             
-            // Apply inline style matching the text block hex color directly to the select item text
-            // Note: Standard system select dropdown text colors depend on browser/OS styling engines
-            opt.style.color = `#${color.val}`;
-            if (color.val === "FFFFFF" || color.val === "F8F9FA" || color.val === "F2F0EA") {
-                opt.style.textShadow = "0px 0px 2px #000"; // Gives white circles structural visibility
+            // Create the true colored circle
+            const dot = document.createElement('div');
+            dot.className = 'color-dot';
+            dot.style.backgroundColor = `#${color.val}`;
+            
+            // Text node
+            const label = document.createTextNode(color.name);
+            
+            btn.appendChild(dot);
+            btn.appendChild(label);
+            
+            // Click handler for grid items
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.color-button').forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+                selectedColorHex = color.val;
+                generateHex();
+            });
+            
+            colorGrid.appendChild(btn);
+            
+            // Auto-select the first color in the new list
+            if (index === 0) {
+                btn.classList.add('selected');
+                selectedColorHex = color.val;
             }
-            
-            colorSelect.appendChild(opt);
         });
         
         generateHex();
@@ -198,12 +261,11 @@
 
     function generateHex() {
         const mat = materialSelect.value;
-        const col = colorSelect.value;
+        const col = selectedColorHex;
         const wgt = weightSelect.value;
 
         if (!col) return;
 
-        // Base structural array from working AnySpool layout configuration
         const baseBlocks = [
             "A2:04:0103A00C", "A2:05:34030FD1", "A2:06:010B5504", 
             "A2:07:656C6567", "A2:08:6F6F2E63", "A2:09:6F6DFE00", 
@@ -211,28 +273,27 @@
             "A2:0D:00000000", "A2:0E:00000000", "A2:0F:00000000"
         ];
 
-        // Dynamic parameters with tracking alignment structural modifications
         const dynamicBlocks = [
-            `A2:10:36${col}`,     // Page 10 (Dynamic Material Color Assignment)
-            "A2:11:EE000100",     // Page 11 structural configuration byte
-            `A2:12:${mat}`,       // Page 12 (Dynamic Material Identification Target Profile)
-            "A2:13:01050000",     // Page 13 execution firmware configuration
-            "A2:14:9E9E9E00",     // Page 14 system parameters
-            "A2:15:00F00104",     // Page 15 default verification array
-            "A2:16:00000000",     // Page 16 clean blank registry placeholder
-            `A2:17:00AF${wgt}`,   // Page 17 (1.75mm Identifier Target Core Weight)
-            "A2:18:26070000"      // Page 18 trailing configuration check block
+            `A2:10:36${col}`,     
+            "A2:11:EE000100",     
+            `A2:12:${mat}`,       
+            "A2:13:01050000",     
+            "A2:14:9E9E9E00",     
+            "A2:15:00F00104",     
+            "A2:16:00000000",     
+            `A2:17:00AF${wgt}`,   
+            "A2:18:26070000"      
         ];
 
         const completePayload = [...baseBlocks, ...dynamicBlocks].join(',');
         hexDisplay.innerText = completePayload;
     }
 
-    materialSelect.addEventListener('change', updateColorDropdown);
-    colorSelect.addEventListener('change', generateHex);
+    materialSelect.addEventListener('change', updateColorGrid);
     weightSelect.addEventListener('change', generateHex);
 
-    updateColorDropdown();
+    // Initial load layout rendering
+    updateColorGrid();
 
     copyBtn.addEventListener('click', () => {
         const textToCopy = hexDisplay.innerText;
@@ -240,7 +301,7 @@
             statusDiv.style.display = 'block';
             setTimeout(() => { statusDiv.style.display = 'none'; }, 2000);
         }).catch(err => {
-            alert('Clipboard deployment failed: ' + err);
+            alert('Clipboard copy failed: ' + err);
         });
     });
 </script>
