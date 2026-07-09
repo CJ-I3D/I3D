@@ -73,27 +73,27 @@
     
     <label for="material">Material Profile</label>
     <select id="material">
-        <option value="PLA">PLA</option>
-        <option value="PLA+">PLA+</option>
-        <option value="PETG">PETG</option>
-        <option value="ABS">ABS</option>
-        <option value="ASA">ASA</option>
+        <option value="00807665">PLA</option>
+        <option value="00807665">PLA+</option>
+        <option value="80698471">PETG</option>
+        <option value="00656683">ABS</option>
+        <option value="00006583">ASA</option>
     </select>
 
     <label for="color">Spool Color</label>
     <select id="color">
-        <option value="#FF0000">🔴 Red</option>
-        <option value="#0000FF">🔵 Blue</option>
-        <option value="#00FF00">🟢 Green</option>
-        <option value="#000000">⚫ Black</option>
-        <option value="#FFFFFF">⚪ White</option>
-        <option value="#7F7F7F">🔘 Grey</option>
+        <option value="FF0000">🔴 Red</option>
+        <option value="0000FF">🔵 Blue</option>
+        <option value="00FF00">🟢 Green</option>
+        <option value="000000">⚫ Black</option>
+        <option value="FFFFFF">⚪ White</option>
+        <option value="7F7F7F">🔘 Grey</option>
     </select>
 
     <label for="weight">Weight (g)</label>
     <select id="weight">
-        <option value="1000">1000g (1kg)</option>
-        <option value="2500">3000g (3kg)</option>
+        <option value="03E8">1000g (1kg)</option>
+        <option value="0BB8">3000g (3kg)</option>
     </select>
 
     <button class="btn-write" id="writeBtn">Tap to Encode Tag</button>
@@ -104,7 +104,6 @@
     const writeBtn = document.getElementById('writeBtn');
     const statusDiv = document.getElementById('status');
 
-    // Establish web audio feedback system
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function beep(freq, duration) {
         const osc = audioCtx.createOscillator();
@@ -124,34 +123,56 @@
         statusDiv.style.display = 'block';
     }
 
+    // Converts Hex strings directly to raw byte arrays
+    function hexToBytes(hex) {
+        let bytes = [];
+        for (let c = 0; c < hex.length; c += 2) {
+            bytes.push(parseInt(hex.substr(c, 2), 16));
+        }
+        return new Uint8Array(bytes);
+    }
+
     writeBtn.addEventListener('click', async () => {
-        // Hardware platform capability check
         if (!('NDEFReader' in window)) {
             showStatus("❌ This browser/device doesn't support Web NFC. Use Chrome on Android.", "error");
             return;
         }
 
-        const mat = document.getElementById('material').value;
-        const col = document.getElementById('color').value.replace('#', ''); // Strips '#' for URI query string compatibility
-        const wgt = document.getElementById('weight').value;
-        
-        // Formulates parameters to match the Elegoo firmware web link parser structure
-        const payloadUrl = `https://www.elegoo.com/filament?m=${mat}&c=${col}&w=${wgt}`;
+        // Gather parameters directly as parsed byte-strings
+        const matHex = document.getElementById('material').value;
+        const colorHex = document.getElementById('color').value;
+        const weightHex = document.getElementById('weight').value;
 
         try {
             showStatus("👋 Hold blank tag against back of phone...", "scanning");
             const ndef = new NDEFReader();
+            await ndef.scan(); // Open antenna gate
+
+            // Compile the precise 4-byte system grid mapping structure 
+            const records = [
+                { recordType: "unknown", data: hexToBytes("0103A00C") }, // Page 04 Wrapper
+                { recordType: "unknown", data: hexToBytes("34030FD1") }, // Page 05 Wrapper
+                { recordType: "unknown", data: hexToBytes("010B5502") }, // Page 06 Wrapper
+                { recordType: "unknown", data: hexToBytes("656C6567") }, // Page 07 (eleg)
+                { recordType: "unknown", data: hexToBytes("6F6F2E63") }, // Page 08 (oo.c)
+                { recordType: "unknown", data: hexToBytes("6F6DFE00") }, // Page 09 (om/f)
+                
+                // Dynamic Parameters block insertion
+                { recordType: "unknown", data: hexToBytes("36" + colorHex) },      // Page 16 (Prefix 36 + Hex Color)
+                { recordType: "unknown", data: hexToBytes(matHex) },              // Page 18 (Material Code)
+                { recordType: "unknown", data: hexToBytes("00AF" + weightHex) },  // Page 23 (1.75mm + Target Weight)
+                { recordType: "unknown", data: hexToBytes("2501C800") },          // Verification block
+                { recordType: "unknown", data: hexToBytes("BD040000") }           // Trailing alignment bit
+            ];
+
+            // Direct sequence execution to the MIFARE sector map
+            await ndef.write({ records: records });
             
-            // Fires explicit URI formatting sequence to the chip loop
-            await ndef.write({
-                records: [{ recordType: "url", data: payloadUrl }]
-            });
-            
-            showStatus("✨ Tag Programmed Successfully!", "success");
-            beep(880, 0.2); // Clean functional success alert
+            showStatus("✨ Custom Tag Configured Successfully!", "success");
+            beep(880, 0.2);
         } catch (error) {
-            showStatus(`❌ Write Failed: ${error.message}`, "error");
-            beep(220, 0.4); // Deep pitch configuration error alert
+            showStatus(`❌ Configuration Failed: ${error.message}`, "error");
+            beep(220, 0.4);
         }
     });
 </script>
