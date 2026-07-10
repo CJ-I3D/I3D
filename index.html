@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirecting...</title>
+    
+    <!-- 1. Instant HTML Redirect (0 seconds delay) -->
+    <meta http-equiv="refresh" content="0;url=filament-writer.html">
+    
+    <script>
+        // 2. JavaScript Fallback (In case the browser blocks meta refreshes)
+        window.location.href = "filament-writer.html";
+    </script>
+</head>
+<body style="background-color: #f8fafc; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; color: #334155;">
+    
+    <!-- 3. Manual link fallback just in case -->
+    <div style="text-align: center;">
+        <p>Redirecting you to the Filament Writer application...</p>
+        <p style="font-size: 0.875rem; color: #64748b;">
+            If you are not redirected automatically, <a href="filament-writer.html" style="color: #005EB8; font-weight: bold; text-decoration: underline;">click here</a>.
+        </p>
+    </div>
+
+</body>
+</html>
