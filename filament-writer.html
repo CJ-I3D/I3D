@@ -41,6 +41,7 @@
             outline: none;
         }
         
+        /* Grid Layout for Colors */
         .color-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
@@ -133,19 +134,17 @@
     
     <label for="material">Material Profile</label>
     <select id="material">
-        <option value="00807665">PLA / PLA+ / Silk / Special</option>
-        <option value="80698471">PETG / Crystal</option>
+        <option value="00807665">PLA</option>
+        <option value="80698471">PETG</option>
     </select>
 
     <label>Spool Color</label>
     <div class="color-grid" id="colorGrid">
-        </div>
+    </div>
 
     <label for="weight">Weight (g)</label>
     <select id="weight">
         <option value="03E8">1000g (1kg)</option>
-        <option value="02EE">750g</option>
-        <option value="01FA">500g</option>
     </select>
 
     <div class="output-box">
@@ -166,9 +165,9 @@
 
     let selectedColorHex = "";
 
-    // Mapped catalog database
+    // Complete catalog database
     const colorCatalog = {
-        "00807665": [
+        "00807665": [ // PLA Options
             { val: "FFFFFF", name: "Frost White" },
             { val: "000000", name: "Midnight Black" },
             { val: "7F8C8D", name: "Shark Grey" },
@@ -198,9 +197,9 @@
             { val: "E0EEEE", name: "Transparent" },
             { val: "556B2F", name: "Ecoblend" }
         ],
-        "80698471": [
+        "80698471": [ // PETG Options
             { val: "F0F2F5", name: "Pearl White" },
-            { val: "5A5F66", name: "Steel Grey" },
+            { val: "EEEEEE", name: "Steel Grey" },
             { val: "0A0A0A", name: "Jet Black" },
             { val: "1D4E89", name: "Pacific Blue" },
             { val: "9B111E", name: "Ruby Red" },
@@ -227,15 +226,18 @@
             btn.className = 'color-button';
             btn.dataset.hex = color.val;
             
+            // Create the true colored circle
             const dot = document.createElement('div');
             dot.className = 'color-dot';
             dot.style.backgroundColor = `#${color.val}`;
             
+            // Text node
             const label = document.createTextNode(color.name);
             
             btn.appendChild(dot);
             btn.appendChild(label);
             
+            // Click handler for grid items
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.color-button').forEach(b => b.classList.remove('selected'));
                 btn.classList.add('selected');
@@ -245,6 +247,7 @@
             
             colorGrid.appendChild(btn);
             
+            // Auto-select the first color in the new list
             if (index === 0) {
                 btn.classList.add('selected');
                 selectedColorHex = color.val;
@@ -261,7 +264,6 @@
 
         if (!col) return;
 
-        // Base structural framing layout
         const baseBlocks = [
             "A2:04:0103A00C", "A2:05:34030FD1", "A2:06:010B5504", 
             "A2:07:656C6567", "A2:08:6F6F2E63", "A2:09:6F6DFE00", 
@@ -269,17 +271,16 @@
             "A2:0D:00000000", "A2:0E:00000000", "A2:0F:00000000"
         ];
 
-        // Adjusted Dynamic Blocks to match factory schema validation
         const dynamicBlocks = [
-            "A2:10:36EEEEEE",     // Page 10: Locked to system category token wrapper
-            "A2:11:EE000100",     // Page 11: Configuration structural alignment byte
-            `A2:12:${mat}`,       // Page 12: Dynamic Material Class Profile Identification
-            "A2:13:01050000",     // Page 13: Core firmware validation block
-            `A2:14:${col}00`,     // Page 14: Dynamic Material Color definition targeting (True Hex Color + 00)
-            "A2:15:00F00104",     // Page 15: Factory encryption sector mapping flag
-            "A2:16:00000000",     // Page 16: Zero-padded sector
-            `A2:17:00AF${wgt}`,   // Page 17: Diameter tracking registration + Core Weight signature
-            "A2:18:26070000"      // Page 18: Tail validation signature checksum
+            "A2:10:36EEEEEE",     // Page 10: Fixed system default category token wrapper
+            "A2:11:EE000100",     
+            `A2:12:${mat}`,       
+            "A2:13:01050000",     
+            `A2:14:${col}00`,     // Page 14: Dynamic Filament Color Payload Assignment (Hex + 00 padding)
+            "A2:15:00F00104",     
+            "A2:16:00000000",     
+            `A2:17:00AF${wgt}`,   
+            "A2:18:26070000"      
         ];
 
         const completePayload = [...baseBlocks, ...dynamicBlocks].join(',');
@@ -289,6 +290,7 @@
     materialSelect.addEventListener('change', updateColorGrid);
     weightSelect.addEventListener('change', generateHex);
 
+    // Initial load layout rendering
     updateColorGrid();
 
     copyBtn.addEventListener('click', () => {
@@ -297,7 +299,7 @@
             statusDiv.style.display = 'block';
             setTimeout(() => { statusDiv.style.display = 'none'; }, 2000);
         }).catch(err => {
-            alert('Clipboard action failed: ' + err);
+            alert('Clipboard copy failed: ' + err);
         });
     });
 </script>
